@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <script src="js/lodash.js"></script>
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/jquery-migrate-1.2.1.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <script>
+      $(function () {
+        function plot(data) {
+          $('#container').highcharts({
+
+            chart: {
+              type: 'column',
+              zoomType: 'xy'
+            },
+            yAxis: {
+              title: {text: 'Occurences'}
+            },
+            xAxis: {
+              title: {text: 'words'},
+              categories: _.pluck(data, 'word'),
+              labels: {
+                rotation: -45
+              }
+            },
+
+            title: {
+              text: 'DNews Words'
+            },
+
+            series: [
+            {
+              data: _.pluck(data, 'count')
+            }
+            ], 
+
+          });
+        }
+
+        var removables = ['the', 'a', 'is', 'to', 'of', 'in', 'and', 'why', 'how',
+        'do', 'for', 'on', 'you', 'your', 'are', 'we', 'our', 'with', 'more', 'have',
+        'better', 'can', 'really', 'make', 'get', 'all', 'from', 'at', 'does', 'new',
+        'be', 'so', 'then', 'will', 'much', 'us', 'like', 'about', 'bad', 'good',
+        'what', 'than', "don't", 'it', 'too',  'should', 'could', 'when', 'an',
+        'actually', 'or', 'up', 'that', 'not', 'vs', 'still', 'without',
+        "can't", 'this', 'into', 'by', "what's", 'd', 'q', 'did', 'out', 'who',
+        'just', 'ever', 'as', 'trace', 'tara', 'laci', 'anthony', 'been', 'has', 'over', "we're",
+        "it's", "you're", 'now', 'take', 'being', 'she', 'he', 'was', 'they', 'were',
+        'down', 'across', 'found', 'many', 'lot', 'here', 'true', 's', 'sure', 'look',
+        'join', 'some', 'there', 'but', 'where', 'if', 'else', 'while', 'their',
+        'these', 'those', 'no', 'yes', 'looks', 'show', 'real', 'right', 'http',
+        '//www', "we've", 'would', 'first', 'second', 'even', 'teels', 'odd', 'his',
+        'any'];
+
+        $.get("./titles_text.txt", function(data) {
+        //  $.get("./description_text.txt", function(data) {
+            var words = data.toLowerCase().replace(/[,:\?\.\-"\!&\d]/g, " ").replace(/\s+/g, ' ').replace("'", '').split(' ');
+            words = _.filter(words, function(word) {
+              return removables.indexOf(word) < 0;
+            });
+            var data = _.countBy(words);
+            var countableData = [];
+            _.each(data, function(count, word) {
+              countableData.push({word: word, count:count});
+            });
+            var sorted = _.sortBy(countableData, 'count');
+            sorted = sorted.reverse();
+
+            plot(sorted.splice(0, 60));
+          });
+
+
+        });
+      </script>
+    </body>
+  </html>
